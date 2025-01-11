@@ -1,38 +1,45 @@
 import React, { useState, useEffect } from 'react';
 
-const EmployeeProfile = ({ employee_id }) => {
+const EmployeeProfile = ({ employee_id: propEmployeeId }) => {
   const [employee, setEmployee] = useState(null); // To store employee data
   const [error, setError] = useState(null);       // To capture any error
   const [isLoading, setIsLoading] = useState(false); // To track loading state
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      setIsLoading(true); // Set loading to true when starting the fetch
-      try {
-        const response = await fetch(`https://cvsu-system-backend.vercel.app/api/employees/${employee_id}`);
+      setIsLoading(true); // Start loading
 
-        if (!response.ok) {
-          // Handle HTTP errors
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Failed to fetch employee data");
+      try {
+        // Get employee_id from props or fallback to localStorage
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        const employeeId = propEmployeeId || storedUser?.employee_id;
+
+        if (!employeeId) {
+          throw new Error('Employee ID not found. Please log in again.');
         }
 
-        const data = await response.json(); // Parse JSON response
+        // Fetch employee data
+        const response = await fetch(`https://cvsu-system-backend.vercel.app/api/employees/${employeeId}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch employee data');
+        }
+
+        const data = await response.json();
         setEmployee(data); // Update employee state
-      } catch (error) {
-        console.error("Error fetching employee data:", error);
-        setError(error.message); // Update error state with message
+      } catch (err) {
+        console.error('Error fetching employee data:', err);
+        setError(err.message);
       } finally {
-        setIsLoading(false); // Set loading to false when fetch is complete
+        setIsLoading(false); // End loading
       }
     };
 
-    if (employee_id) {
-      fetchEmployeeData();
-    }
-  }, [employee_id]); // Dependency array includes employee_id
+    fetchEmployeeData();
+  }, [propEmployeeId]); // Re-run if prop changes
 
-  // Display loading spinner while data is being fetched
+  // Display loading spinner
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -54,7 +61,7 @@ const EmployeeProfile = ({ employee_id }) => {
     return <div className="text-center text-gray-600">No employee data found.</div>;
   }
 
-  // Render the profile if data is fetched
+  // Render the profile
   return (
     <div className="p-8 bg-green-500 min-h-screen">
       <div className="bg-white shadow-lg rounded-lg p-6 max-w-4xl mx-auto">

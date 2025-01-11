@@ -808,6 +808,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false, // Ignore self-signed certificate error
+  },
   logger: true,
   debug: true,
 });
@@ -1135,6 +1138,7 @@ app.get('/api/employees/:employee_id', async (req, res) => {
 
     // Send back the employee details
     res.status(200).json({
+      employee_id: employee.employee_id,
       full_name: employee.full_name,
       employee_type: employee.employee_type,
       phone_number: employee.phone_number,
