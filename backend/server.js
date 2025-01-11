@@ -1114,6 +1114,41 @@ app.delete("/api/delete_instructor", async (req, res) => {
   }
 });
 
+//Route to get employee by employee ID
+app.get('/api/employees/:employee_id', async (req, res) => {
+  const { employee_id } = req.params;
+
+  try {
+    // Query to fetch employee details where status is Active
+    const [employeeResults] = await db.query(
+      'SELECT * FROM employees WHERE employee_id = ? AND status = "Active"',
+      [employee_id]
+    );
+
+    // If no results, return a 404 error
+    if (employeeResults.length === 0) {
+      return res.status(404).json({ message: 'Employee not found or inactive' });
+    }
+
+    // Extract the first result
+    const employee = employeeResults[0];
+
+    // Send back the employee details
+    res.status(200).json({
+      full_name: employee.full_name,
+      employee_type: employee.employee_type,
+      phone_number: employee.phone_number,
+      address: employee.address,
+      dob: employee.dob,
+      emergency_contact: employee.emergency_contact,
+    });
+
+  } catch (err) {
+    // Catch any errors and return a 500 error
+    console.error('Error fetching employee data:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 
 app.get('/', (req, res) => {
