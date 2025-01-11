@@ -513,7 +513,7 @@ const EmployeeDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto h-full p-8">
-        <Outlet /> {/* This renders the nested route components */}
+        <Outlet context={{ user }}/> {/* This renders the nested route components */}
       </main>
 
       {/* Logout Confirmation Modal */}

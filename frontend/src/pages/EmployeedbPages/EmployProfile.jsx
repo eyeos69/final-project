@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom'; // Import useOutletContext
 
-const EmployeeProfile = ({ employee_id: propEmployeeId }) => {
+const EmployeeProfile = () => {
+  const { user } = useOutletContext(); // Access the userDetails from context
   const [employee, setEmployee] = useState(null); // To store employee data
-  const [error, setError] = useState(null);       // To capture any error
+  const [error, setError] = useState(null); // To capture any error
   const [isLoading, setIsLoading] = useState(false); // To track loading state
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      setIsLoading(true); // Start loading
+      setIsLoading(true);
 
       try {
-        // Get employee_id from props or fallback to localStorage
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        const employeeId = propEmployeeId || storedUser?.employee_id;
-
-        if (!employeeId) {
+        // Ensure that userDetails is available
+        if (!user?.employee_id) {
           throw new Error('Employee ID not found. Please log in again.');
         }
 
-        // Fetch employee data
+        const employeeId = user.employee_id;
+
         const response = await fetch(`https://cvsu-system-backend.vercel.app/api/employees/${employeeId}`);
 
         if (!response.ok) {
@@ -27,17 +27,17 @@ const EmployeeProfile = ({ employee_id: propEmployeeId }) => {
         }
 
         const data = await response.json();
-        setEmployee(data); // Update employee state
+        setEmployee(data); // Update state with employee data
       } catch (err) {
-        console.error('Error fetching employee data:', err);
+        console.error('Error fetching employee data:', err.message);
         setError(err.message);
       } finally {
-        setIsLoading(false); // End loading
+        setIsLoading(false);
       }
     };
 
     fetchEmployeeData();
-  }, [propEmployeeId]); // Re-run if prop changes
+  }, [user]); // Re-run if userDetails changes
 
   // Display loading spinner
   if (isLoading) {
