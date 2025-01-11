@@ -3,9 +3,11 @@ import React, { useState, useEffect } from 'react';
 const EmployeeProfile = ({ employee_id }) => {
   const [employee, setEmployee] = useState(null); // To store employee data
   const [error, setError] = useState(null);       // To capture any error
+  const [isLoading, setIsLoading] = useState(false); // To track loading state
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
+      setIsLoading(true); // Set loading to true when starting the fetch
       try {
         const response = await fetch(`https://cvsu-system-backend.vercel.app/api/employees/${employee_id}`);
 
@@ -20,6 +22,8 @@ const EmployeeProfile = ({ employee_id }) => {
       } catch (error) {
         console.error("Error fetching employee data:", error);
         setError(error.message); // Update error state with message
+      } finally {
+        setIsLoading(false); // Set loading to false when fetch is complete
       }
     };
 
@@ -27,6 +31,18 @@ const EmployeeProfile = ({ employee_id }) => {
       fetchEmployeeData();
     }
   }, [employee_id]); // Dependency array includes employee_id
+
+  // Display loading spinner while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+          <p className="mt-4 text-gray-600">Loading employee data...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Handle errors
   if (error) {
